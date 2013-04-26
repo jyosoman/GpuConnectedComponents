@@ -1,13 +1,20 @@
-Copyright (C) 2009  Jyothish Soman
+*       Copyright (c) 2010 International Institute of Information Technology,
+*       Hyderabad.
+*       All rights reserved.
+*
+*       Permission to use, copy, modify and distribute this software and its
+*       documentation for research purpose is hereby granted without fee,
+*       provided that the above copyright notice and this permission notice appear
+*       in all copies of this software and that you do not sell the software.
+*
+*       THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
+*       EXPRESS, IMPLIED OR OTHERWISE.
+*
+*       Please report any issues to Jyothish Soman (jyothish@students.iiit.ac.in)
+*
+*       Please cite following paper, if you use this software for research purpose
+*
+*       "Fast GPU Algorithms for Graph Connectivity, Jyothish Soman, K. Kothapalli, 
+*       and P. J. Narayanan, in Proc. of Large Scale Parallel Processing, 
+*       IPDPS Workshops, 2010.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
