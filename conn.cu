@@ -41,20 +41,21 @@
 #include <cutil.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-// declaration, forward
-//void runTest( int argc, char** argv);
 
-//extern "C" void computeGold( float* reference, float* idata, const unsigned int len);
 
 struct ed{
 		long long int x;
 };
+
 typedef struct ed edge;
+
 struct grp{
 		int num_e,num_n;
 		int**neigh,*deg;
 };
+
 typedef struct grp my_graph;
+
 void load_graph(edge** ed_list,int*num_n,int*num_e){
 		FILE*fp,*fp2;
 		edge*edl;
@@ -71,11 +72,6 @@ void load_graph(edge** ed_list,int*num_n,int*num_e){
 		}
 		for(a=0;a<i;a++){
 				fscanf(fp,"%d%d",&x,&y);
-				/*				if(x>y){
-								a--;
-								}
-								else{
-				 */	
 				x=x-1;
 				y=y-1;
 				v=0;
@@ -83,8 +79,6 @@ void load_graph(edge** ed_list,int*num_n,int*num_e){
 				v=v<<32;
 				v+=(long long int) y;
 				edl[a].x=v;
-
-				//				}
 		}
 		*num_n=j;
 		*num_e=i;
@@ -95,7 +89,6 @@ void load_graph(edge** ed_list,int*num_n,int*num_e){
 __global__ void select_winner_init(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
 		int a,b,x,y,mn,mx;
 		long long int t;
-		//		a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;
 		b=threadIdx.x;
 		a=a*512+b;
@@ -113,7 +106,6 @@ __global__ void select_winner_init(int* an,edge *ed_list,int num_e,int num_n,int
 __global__ void select_winner2(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
 		int a,b,x,y,a_x,a_y,mn,mx;
 		long long int t;
-		//		a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;
 		b=threadIdx.x;
 		__shared__ int s_flag;
@@ -151,7 +143,6 @@ __global__ void select_winner2(int* an,edge *ed_list,int num_e,int num_n,int*fla
 __global__ void select_winner(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
 		int a,b,x,y,a_x,a_y,mn,mx;
 		long long int t;
-		//		a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;
 		b=threadIdx.x;
 		__shared__ int s_flag;
@@ -188,7 +179,6 @@ __global__ void select_winner(int* an,edge *ed_list,int num_e,int num_n,int*flag
 }
 __global__ void p_jump(int num_n,int* an,int *flag){
 		int a,b,x,y;
-		//		a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;		
 		b=threadIdx.x;
 		a=a*512+b;
@@ -215,7 +205,6 @@ __global__ void p_jump(int num_n,int* an,int *flag){
 }
 __global__ void p_jump_masked(int num_n,int* an,int *flag,char*mask){
 		int a,b,x,y;
-		//      a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;
 		b=threadIdx.x;
 		a=a*512+b;
@@ -246,7 +235,6 @@ __global__ void p_jump_masked(int num_n,int* an,int *flag,char*mask){
 }
 __global__ void p_jump_unmasked(int num_n,int* an,char *mask){
 		int a,b,x,y;
-		//      a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;
 		b=threadIdx.x;
 		a=a*512+b;
@@ -262,7 +250,6 @@ __global__ void p_jump_unmasked(int num_n,int* an,char *mask){
 
 __global__ void update_an(int*an,int num_n){
 		int a,b;
-		//		a=blockIdx.x;
 		a=blockIdx.y*gridDim.x+blockIdx.x;		
 		b=threadIdx.x;
 		a=a*512+b;
@@ -342,7 +329,6 @@ int main( int argc, char** argv)
 
 		CUDA_SAFE_CALL(cudaMemcpy(d_ed_list,ed_list,num_e*sizeof(edge),cudaMemcpyHostToDevice));
 		int xx;
-		//		for(xx=0;xx<100;xx++){
 		update_mark<<<grid_e,threads>>>(d_mark,num_e);
 		update_an<<<grid_n,threads>>>(d_an,num_n);
 		cudaThreadSynchronize();
@@ -406,7 +392,6 @@ int main( int argc, char** argv)
 						flg=0;
 						CUDA_SAFE_CALL(cudaMemcpy(d_flag,&flg,sizeof(int),cudaMemcpyHostToDevice));
 						p_jump_masked<<<grid_n,threads>>>(num_n,d_an,d_flag,mask);
-//						p_jump<<<grid_n,threads>>>(num_n,d_an,d_flag);
 						cudaThreadSynchronize();
 
 						CUT_CHECK_ERROR("Kernel execution failed");
@@ -423,12 +408,9 @@ int main( int argc, char** argv)
 		}while(flag);
 		CUT_SAFE_CALL( cutStopTimer( timer));
 		printf( "%f\n", cutGetTimerValue( timer));
-		//				printf( "Processing time: %f (ms)\n", cutGetTimerValue( timer));
 		CUT_SAFE_CALL( cutDeleteTimer( timer));
-		//		}
 		mark=(char*)calloc(num_e,sizeof(char));
 		//end of main loop
-		//		CUDA_SAFE_CALL(cudaMemcpy(mark,d_mark,num_e*sizeof(char),cudaMemcpyDeviceToHost));
 		CUDA_SAFE_CALL(cudaMemcpy(an,d_an,num_n*sizeof(int),cudaMemcpyDeviceToHost));
 		int j,cnt=0;
 		for(j=0;j<num_n;j++){
