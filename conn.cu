@@ -38,7 +38,14 @@
 #include <math.h>
 #include<time.h>
 // includes, project
-#include <cutil.h>
+//#include <helper_functions.h>
+
+#include<helper_cuda.h>
+#include <timer.h>
+#include<cuda.h>
+#include<cuda_runtime.h>
+
+//#include <cutil.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -333,7 +340,7 @@ __global__ void update_an(int*an,int num_n){
    Function to initialize each edge as a clean copy. 
  */
 __global__ void	update_mark(char *mark,int num_e){
-    int i,j;
+    int j;
     j=blockIdx.y*gridDim.x+blockIdx.x;
     j=j*512+threadIdx.x;
     if(j>=num_e)
@@ -347,7 +354,7 @@ __global__ void	update_mark(char *mark,int num_e){
  */
 
 __global__ void update_mask(char *mask,int n,int *an){
-    int i,j;
+    int j;
     j=blockIdx.y*gridDim.x+blockIdx.x;
     j=j*512+threadIdx.x;
     if(j>=n)
@@ -361,13 +368,13 @@ __global__ void update_mask(char *mask,int n,int *an){
 int main( int argc, char** argv) 
 {
 
-    CUT_DEVICE_INIT(argc, argv);
+    findCudaDevice(argc, argv);
 
     edge* ed_list,*d_ed_list;
     int num_n,num_e,nnx,nny,nex,ney;	
     unsigned int timer1 = 0;
-    CUT_SAFE_CALL( cutCreateTimer( &timer1));
-    CUT_SAFE_CALL( cutStartTimer( timer1));
+    checkCudaErrors( cutCreateTimer( &timer1));
+    checkCudaErrors( cutStartTimer( timer1));
 
 
     load_graph(&ed_list,&num_n,&num_e);
@@ -377,7 +384,7 @@ int main( int argc, char** argv)
     char*d_mark,*mark;
     char*mask;
 
-    int num_threads,num_blocks_n,num_blocks_e,itr=0;
+    int num_threads,num_blocks_n,num_blocks_e;
     num_threads=512;
     num_blocks_n=(num_n/512)+1;
     num_blocks_e=(num_e/512)+1;
@@ -390,31 +397,31 @@ int main( int argc, char** argv)
     dim3  threads( num_threads, 1);
 
     an=(int*)calloc(num_n,sizeof(int));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_mark,num_e*sizeof(char)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&mask,num_e*sizeof(char)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_winner,num_n*sizeof(int)));
-    CUT_CHECK_ERROR("Memory allocation failed");
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_an,num_n*sizeof(int)));
-    CUT_CHECK_ERROR("Memory allocation failed");
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_ed_list,num_e*sizeof(edge)));
-    CUT_CHECK_ERROR("Memory allocation failed");
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_flag,sizeof(int)));
-    CUT_CHECK_ERROR("Memory allocation failed");
+    checkCudaErrors(cudaMalloc((void**)&d_mark,num_e*sizeof(char)));
+    checkCudaErrors(cudaMalloc((void**)&mask,num_e*sizeof(char)));
+    checkCudaErrors(cudaMalloc((void**)&d_winner,num_n*sizeof(int)));
+//    CUT_CHECK_ERROR("Memory allocation failed");
+    checkCudaErrors(cudaMalloc((void**)&d_an,num_n*sizeof(int)));
+//    CUT_CHECK_ERROR("Memory allocation failed");
+    checkCudaErrors(cudaMalloc((void**)&d_ed_list,num_e*sizeof(edge)));
+//    CUT_CHECK_ERROR("Memory allocation failed");
+    checkCudaErrors(cudaMalloc((void**)&d_flag,sizeof(int)));
+//    CUT_CHECK_ERROR("Memory allocation failed");
 
-    CUT_SAFE_CALL( cutStopTimer( timer1));
-    CUT_SAFE_CALL( cutDeleteTimer( timer1));
+    checkCudaErrors( cutStopTimer( timer1));
+    checkCudaErrors( cutDeleteTimer( timer1));
 
 
 
-    CUDA_SAFE_CALL(cudaMemcpy(d_ed_list,ed_list,num_e*sizeof(edge),cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(d_ed_list,ed_list,num_e*sizeof(edge),cudaMemcpyHostToDevice));
 
     
 
     //   Finished intializing space for the program, ideally timing should be from here.
 
     unsigned int timer = 0;
-    CUT_SAFE_CALL( cutCreateTimer( &timer));
-    CUT_SAFE_CALL( cutStartTimer( timer));
+    checkCudaErrors( cutCreateTimer( &timer));
+    checkCudaErrors( cutStartTimer( timer));
     
 
 
@@ -422,8 +429,8 @@ int main( int argc, char** argv)
     update_an<<<grid_n,threads>>>(d_an,num_n);
     cudaThreadSynchronize();
 
-    CUT_CHECK_ERROR("Kernel execution failed");
-//    CUDA_SAFE_CALL(cudaMemcpy(an,d_an,num_n*sizeof(int),cudaMemcpyDeviceToHost));
+//    CUT_CHECK_ERROR("Kernel execution failed");
+//    checkCudaErrors(cudaMemcpy(an,d_an,num_n*sizeof(int),cudaMemcpyDeviceToHost));
     cudaThreadSynchronize();
 
 
@@ -433,19 +440,19 @@ int main( int argc, char** argv)
     select_winner_init<<<grid_e,threads>>>(d_an,d_ed_list,num_e,num_n,d_flag,d_mark);
     cudaThreadSynchronize();
 
-    CUT_CHECK_ERROR("Kernel execution failed");
+//    CUT_CHECK_ERROR("Kernel execution failed");
 
-    CUT_CHECK_ERROR("Kernel execution failed");
+//    CUT_CHECK_ERROR("Kernel execution failed");
 
 
     do{
         flag=0;
-        CUDA_SAFE_CALL(cudaMemcpy(d_flag,&flag,sizeof(int),cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpy(d_flag,&flag,sizeof(int),cudaMemcpyHostToDevice));
         p_jump<<<grid_n,threads>>>(num_n,d_an,d_flag);
         cudaThreadSynchronize();
 
-        CUT_CHECK_ERROR("Kernel execution failed");
-        CUDA_SAFE_CALL(cudaMemcpy(&flag,d_flag,sizeof(int),cudaMemcpyDeviceToHost));
+//        CUT_CHECK_ERROR("Kernel execution failed");
+        checkCudaErrors(cudaMemcpy(&flag,d_flag,sizeof(int),cudaMemcpyDeviceToHost));
     }while(flag);
 
     //main code starts
@@ -454,7 +461,7 @@ int main( int argc, char** argv)
     int lpc=1;
     do{
         flag=0;				
-        CUDA_SAFE_CALL(cudaMemcpy(d_flag,&flag,sizeof(int),cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpy(d_flag,&flag,sizeof(int),cudaMemcpyHostToDevice));
         if(lpc!=0){
             select_winner<<<grid_e,threads>>>(d_an,d_ed_list,num_e,num_n,d_flag,d_mark);
             lpc++;
@@ -467,39 +474,39 @@ int main( int argc, char** argv)
         }
         cudaThreadSynchronize();
 
-        CUT_CHECK_ERROR("Kernel execution failed");
-        CUDA_SAFE_CALL(cudaMemcpy(&flag,d_flag,sizeof(int),cudaMemcpyDeviceToHost));
+ //       CUT_CHECK_ERROR("Kernel execution failed");
+        checkCudaErrors(cudaMemcpy(&flag,d_flag,sizeof(int),cudaMemcpyDeviceToHost));
         if(flag==0){
             break;
         }
 
-        CUT_CHECK_ERROR("Kernel execution failed");
+//        CUT_CHECK_ERROR("Kernel execution failed");
 
         int flg;
         do{
             flg=0;
-            CUDA_SAFE_CALL(cudaMemcpy(d_flag,&flg,sizeof(int),cudaMemcpyHostToDevice));
+            checkCudaErrors(cudaMemcpy(d_flag,&flg,sizeof(int),cudaMemcpyHostToDevice));
             p_jump_masked<<<grid_n,threads>>>(num_n,d_an,d_flag,mask);
             cudaThreadSynchronize();
 
-            CUT_CHECK_ERROR("Kernel execution failed");
-            CUDA_SAFE_CALL(cudaMemcpy(&flg,d_flag,sizeof(int),cudaMemcpyDeviceToHost));
+//            CUT_CHECK_ERROR("Kernel execution failed");
+            checkCudaErrors(cudaMemcpy(&flg,d_flag,sizeof(int),cudaMemcpyDeviceToHost));
         }while(flg);
 
         p_jump_unmasked<<<grid_n,threads>>>(num_n,d_an,mask);
         cudaThreadSynchronize();
-        CUT_CHECK_ERROR("Kernel execution failed");
+//        CUT_CHECK_ERROR("Kernel execution failed");
 
         update_mask<<<grid_n,threads>>>(mask,num_n,d_an);
-        CUT_CHECK_ERROR("Kernel execution failed");
+//        CUT_CHECK_ERROR("Kernel execution failed");
         cudaThreadSynchronize();
     }while(flag);
-    CUT_SAFE_CALL( cutStopTimer( timer));
+    checkCudaErrors( cutStopTimer( timer));
     printf( "%f\n", cutGetTimerValue( timer));
-    CUT_SAFE_CALL( cutDeleteTimer( timer));
+    checkCudaErrors( cutDeleteTimer( timer));
     mark=(char*)calloc(num_e,sizeof(char));
     //end of main loop
-    CUDA_SAFE_CALL(cudaMemcpy(an,d_an,num_n*sizeof(int),cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(an,d_an,num_n*sizeof(int),cudaMemcpyDeviceToHost));
     int j,cnt=0;
     for(j=0;j<num_n;j++){
         if(an[j]==j){
@@ -510,8 +517,8 @@ int main( int argc, char** argv)
     printf("The number of components=%d\n",cnt);
     free(an);
     free(mark);
-    CUDA_SAFE_CALL(cudaFree(d_an));
-    CUDA_SAFE_CALL(cudaFree(d_ed_list));
-    CUDA_SAFE_CALL(cudaFree(d_flag));
-    CUDA_SAFE_CALL(cudaFree(d_mark));
+    checkCudaErrors(cudaFree(d_an));
+    checkCudaErrors(cudaFree(d_ed_list));
+    checkCudaErrors(cudaFree(d_flag));
+    checkCudaErrors(cudaFree(d_mark));
 }
