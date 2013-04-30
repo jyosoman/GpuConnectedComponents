@@ -368,13 +368,13 @@ __global__ void update_mask(char *mask,int n,int *an){
 int main( int argc, char** argv) 
 {
 
-    findCudaDevice(argc, argv);
+    findCudaDevice(argc,(const char**) argv);
 
     edge* ed_list,*d_ed_list;
     int num_n,num_e,nnx,nny,nex,ney;	
-    unsigned int timer1 = 0;
-    checkCudaErrors( cutCreateTimer( &timer1));
-    checkCudaErrors( cutStartTimer( timer1));
+//    unsigned int timer1 = 0;
+//    checkCudaErrors( cutCreateTimer( &timer1));
+//    checkCudaErrors( cutStartTimer( timer1));
 
 
     load_graph(&ed_list,&num_n,&num_e);
@@ -383,6 +383,7 @@ int main( int argc, char** argv)
     int *d_flag,*an;
     char*d_mark,*mark;
     char*mask;
+
 
     int num_threads,num_blocks_n,num_blocks_e;
     num_threads=512;
@@ -408,8 +409,8 @@ int main( int argc, char** argv)
     checkCudaErrors(cudaMalloc((void**)&d_flag,sizeof(int)));
 //    CUT_CHECK_ERROR("Memory allocation failed");
 
-    checkCudaErrors( cutStopTimer( timer1));
-    checkCudaErrors( cutDeleteTimer( timer1));
+//    checkCudaErrors( cutStopTimer( timer1));
+//    checkCudaErrors( cutDeleteTimer( timer1));
 
 
 
@@ -419,9 +420,10 @@ int main( int argc, char** argv)
 
     //   Finished intializing space for the program, ideally timing should be from here.
 
-    unsigned int timer = 0;
-    checkCudaErrors( cutCreateTimer( &timer));
-    checkCudaErrors( cutStartTimer( timer));
+    clock_t t = clock();
+//    unsigned int timer = 0;
+//    checkCudaErrors( cutCreateTimer( &timer));
+//    checkCudaErrors( cutStartTimer( timer));
     
 
 
@@ -501,9 +503,13 @@ int main( int argc, char** argv)
 //        CUT_CHECK_ERROR("Kernel execution failed");
         cudaThreadSynchronize();
     }while(flag);
-    checkCudaErrors( cutStopTimer( timer));
-    printf( "%f\n", cutGetTimerValue( timer));
-    checkCudaErrors( cutDeleteTimer( timer));
+    t = clock() - t;
+//    checkCudaErrors( cutStopTimer( timer));
+//    printf( "%f\n", cutGetTimerValue( timer));
+//    checkCudaErrors( cutDeleteTimer( timer));
+    printf ("Time required for computing connected components on the graph is: %f seconds.\n",((float)t)/CLOCKS_PER_SEC);
+    
+    
     mark=(char*)calloc(num_e,sizeof(char));
     //end of main loop
     checkCudaErrors(cudaMemcpy(an,d_an,num_n*sizeof(int),cudaMemcpyDeviceToHost));
