@@ -54,7 +54,8 @@ struct grp{
 typedef struct grp my_graph;
 
 
-__global__ void select_winner_init(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
+__global__ 
+void select_winner_init(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
     int a,b,x,y,mn,mx;
     long long int t;
     a=blockIdx.y*gridDim.x+blockIdx.x;
@@ -81,7 +82,8 @@ __global__ void select_winner_init(int* an,edge *ed_list,int num_e,int num_n,int
 
 
 
-__global__ void select_winner2(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
+__global__ 
+void select_winner2(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
     int a,b,x,y,a_x,a_y,mn,mx;
     long long int t;
     a=blockIdx.y*gridDim.x+blockIdx.x;
@@ -126,7 +128,8 @@ __global__ void select_winner2(int* an,edge *ed_list,int num_e,int num_n,int*fla
 
 
  */   
-__global__ void select_winner(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
+__global__ 
+void select_winner(int* an,edge *ed_list,int num_e,int num_n,int*flag,char*mark){
     int a,b,x,y,a_x,a_y,mn,mx;
     long long int t;
     a=blockIdx.y*gridDim.x+blockIdx.x;
@@ -167,7 +170,8 @@ __global__ void select_winner(int* an,edge *ed_list,int num_e,int num_n,int*flag
 
 
 
-__global__ void p_jump(int num_n,int* an,int *flag){
+__global__ 
+void p_jump(int num_n,int* an,int *flag){
     int a,b,x,y;
     a=blockIdx.y*gridDim.x+blockIdx.x;		
     b=threadIdx.x;
@@ -202,7 +206,8 @@ __global__ void p_jump(int num_n,int* an,int *flag){
 
 
  */
-__global__ void p_jump_masked(int num_n,int* an,int *flag,char*mask){
+__global__ 
+void p_jump_masked(int num_n,int* an,int *flag,char*mask){
     int a,b,x,y;
     a=blockIdx.y*gridDim.x+blockIdx.x;
     b=threadIdx.x;
@@ -241,7 +246,8 @@ __global__ void p_jump_masked(int num_n,int* an,int *flag,char*mask){
 
  */
 
-__global__ void p_jump_unmasked(int num_n,int* an,char *mask){
+__global__ 
+void p_jump_unmasked(int num_n,int* an,char *mask){
     int a,b,x,y;
     a=blockIdx.y*gridDim.x+blockIdx.x;
     b=threadIdx.x;
@@ -259,7 +265,8 @@ __global__ void p_jump_unmasked(int num_n,int* an,char *mask){
 /*
    Function to create self pointing tree.
  */
-__global__ void update_an(int*an,int num_n){
+__global__ 
+void update_an(int*an,int num_n){
     int a,b;
     a=blockIdx.y*gridDim.x+blockIdx.x;		
     b=threadIdx.x;
@@ -274,7 +281,8 @@ __global__ void update_an(int*an,int num_n){
 /*
    Function to initialize each edge as a clean copy. 
  */
-__global__ void	update_mark(char *mark,int num_e){
+__global__ 
+void	update_mark(char *mark,int num_e){
     int j;
     j=blockIdx.y*gridDim.x+blockIdx.x;
     j=j*512+threadIdx.x;
@@ -288,7 +296,8 @@ __global__ void	update_mark(char *mark,int num_e){
 
  */
 
-__global__ void update_mask(char *mask,int n,int *an){
+__global__ 
+void update_mask(char *mask,int n,int *an){
     int j;
     j=blockIdx.y*gridDim.x+blockIdx.x;
     j=j*512+threadIdx.x;
