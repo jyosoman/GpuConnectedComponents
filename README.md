@@ -10,7 +10,7 @@
 *       THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND,
 *       EXPRESS, IMPLIED OR OTHERWISE.
 *
-*       Please report any issues to Jyothish Soman (jyothish@students.iiit.ac.in)
+*       Please report any issues to Jyothish Soman (first.last gmail)
 *
 *       Please cite following paper, if you use this software for research purpose
 *
